@@ -10,14 +10,14 @@ using namespace boost::asio;
 
 io_service global_io_service;
 
-class EchoSession : public enable_shared_from_this<EchoSession> {
+class HTTPSession : public enable_shared_from_this<HTTPSession> {
  private:
   enum { max_length = 1024 };
   ip::tcp::socket _socket;
   array<char, max_length> _data;
 
  public:
-  EchoSession(ip::tcp::socket socket) : _socket(move(socket)) {}
+  HTTPSession(ip::tcp::socket socket) : _socket(move(socket)) {}
 
   void start() { do_read(); }
 
@@ -41,13 +41,13 @@ class EchoSession : public enable_shared_from_this<EchoSession> {
   }
 };
 
-class EchoServer {
+class HTTPServer {
  private:
   ip::tcp::acceptor _acceptor;
   ip::tcp::socket _socket;
 
  public:
-  EchoServer(short port)
+  HTTPServer(short port)
       : _acceptor(global_io_service, ip::tcp::endpoint(ip::tcp::v4(), port)),
         _socket(global_io_service) {
     do_accept();
@@ -56,7 +56,7 @@ class EchoServer {
  private:
   void do_accept() {
     _acceptor.async_accept(_socket, [this](boost::system::error_code ec) {
-      if (!ec) make_shared<EchoSession>(move(_socket))->start();
+      if (!ec) make_shared<HTTPSession>(move(_socket))->start();
 
       do_accept();
     });
@@ -71,7 +71,7 @@ int main(int argc, char* const argv[]) {
 
   try {
     unsigned short port = atoi(argv[1]);
-    EchoServer server(port);
+    HTTPServer server(port);
     global_io_service.run();
   } catch (exception& e) {
     cerr << "Exception: " << e.what() << "\n";
