@@ -14,15 +14,83 @@
 
 using namespace std;
 using namespace boost::asio;
+using namespace boost::system;
 
-class Client{
+class ShellSession: enable_share_from_this<ShellSession>{
+private:
+    enum { max_length = 1024 };
+    ip::tcp::socket _socket;
+    ip::tcp::resolver _resolver;
+    tcp::resolver::iterator endpoint_iterator;
+
     string hostname;
     unsigned short port;
     string filename;
-private:
 
 public:
+    ShellSession(
+            string hostname,
+            unsigned short port,
+            string filename
+            ): _socket(global)
+    void start(){
+        do_resolve();
+    }
+private:
+    void do_resolve(){
+        auto self(shared_from_this());
+        _resolver.async_resolve(query,
+                [this, self](boost::system::error_code ec,
+                        tcp::resolver::iterator endpoint_iterator){
+                if (!err)
+                {
+                    // Attempt a connection to the first endpoint in the list. Each endpoint
+                    // will be tried until we successfully establish a connection.
+                    do_connect(endpoint_iterator);
+                } else{
+                    _socket.close();
+                }
+        });
+    }
+    void do_connect(tcp::resolver::iterator endpoint_iterator){
+        auto self(shared_from_this());
+        _socket.async_connect(endpoint,
+                      [this, self](boost::system::error_code ec,
+                                   tcp::resolver::iterator endpoint_iterator){
+            if (!ec){
+                do_read();
+            } else{
+                _socket.close();
+            }
+        });
+    }
+    void do_read() {
+        auto self(shared_from_this());
+        _socket.async_read_some(
+            buffer(_data, max_length),
+            [this, self](boost::system::error_code ec, size_t length) {
+                if (!ec){
+                    if (buffer.find("%")!=string::npos)
+                        do_send_cmd();
+                    do_send_cmd();
+                } else{
+                    _socket.close();
+                }
+        });
+    }
+    void do_send_cmd(string id){
 
+    }
+};
+class clinet{
+private:
+    string hostname;
+    unsigned short port;
+    string filename;
+public:
+    void run(){
+        make_shared<ShellSession>();
+    }
 };
 
 int main(){
