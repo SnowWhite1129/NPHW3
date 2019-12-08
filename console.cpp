@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <array>
 #include <boost/asio.hpp>
 #include <cstdlib>
@@ -11,38 +13,45 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
+#include <err.h>
 
 using namespace std;
 using namespace boost::asio;
 using namespace boost::system;
+using namespace ip;
 
-class ShellSession: enable_share_from_this<ShellSession>{
+io_service global_io_service;
+
+class ShellSession: enable_shared_from_this<ShellSession>{
 private:
     enum { max_length = 1024 };
-    ip::tcp::socket _socket;
-    ip::tcp::resolver _resolver;
-    tcp::resolver::iterator endpoint_iterator;
+    tcp::socket _socket;
+    tcp::resolver _resolver;
+    tcp::resolver::query _query;
 
-    string hostname;
-    unsigned short port;
-    string filename;
+    string _hostname;
+    string _port;
+    string _filename;
+    array<char, max_length> _data;
 
 public:
-    ShellSession(
-            string hostname,
-            unsigned short port,
-            string filename
-            ): _socket(global)
+    ShellSession(const string &hostname, const string &port, const string &filename):
+    _socket(global_io_service),
+    _resolver(global_io_service),
+    _query(hostname, port),
+    _hostname(hostname),
+    _port(port),
+    _filename(filename){}
     void start(){
         do_resolve();
     }
 private:
     void do_resolve(){
         auto self(shared_from_this());
-        _resolver.async_resolve(query,
+        _resolver.async_resolve(_query,
                 [this, self](boost::system::error_code ec,
                         tcp::resolver::iterator endpoint_iterator){
-                if (!err)
+                if (!ec)
                 {
                     // Attempt a connection to the first endpoint in the list. Each endpoint
                     // will be tried until we successfully establish a connection.
@@ -52,11 +61,9 @@ private:
                 }
         });
     }
-    void do_connect(tcp::resolver::iterator endpoint_iterator){
+    void do_connect(const tcp::resolver::iterator &endpoint_iterator){
         auto self(shared_from_this());
-        _socket.async_connect(endpoint,
-                      [this, self](boost::system::error_code ec,
-                                   tcp::resolver::iterator endpoint_iterator){
+        async_connect(_socket, endpoint_iterator, [this, self](const boost::system::error_code &ec, tcp::resolver::iterator endpoint_iterator){
             if (!ec){
                 do_read();
             } else{
@@ -70,26 +77,31 @@ private:
             buffer(_data, max_length),
             [this, self](boost::system::error_code ec, size_t length) {
                 if (!ec){
-                    if (buffer.find("%")!=string::npos)
-                        do_send_cmd();
-                    do_send_cmd();
+//                    if (buffer.find("%")!=string::npos)
+//                        do_send_cmd();
+//                    do_read();
                 } else{
                     _socket.close();
                 }
         });
     }
-    void do_send_cmd(string id){
+    void do_send_cmd(){
 
     }
 };
-class clinet{
+class Client{
 private:
     string hostname;
-    unsigned short port;
+    string port;
     string filename;
 public:
+    Client(const string &hostname_, const string &port_, const string &filename_){
+        hostname = hostname_;
+        port = port_;
+        filename = filename_;
+    }
     void run(){
-        make_shared<ShellSession>();
+        make_shared<ShellSession>(hostname, port, filename)->start();
     }
 };
 
@@ -151,10 +163,27 @@ int main(){
   </body>
 </html>
     )";
+    vector <Client> clients;
     string parse_paremeter = getenv("QUERY_STRING");
     regex reg("((|&)\\w+=)([^&]+)");
     smatch m;
     while (regex_search(parse_paremeter, m, reg)){
-        
+        string hostname = m[3].str();
+        regex_search(parse_paremeter, m, reg);
+        string port = m[3].str();
+        regex_search(parse_paremeter, m, reg);
+        string filename = m[3].str();
+        Client client(hostname, port, filename);
+        clients.push_back(client);
+    }
+    try {
+        if (!clients.empty()){
+            for (auto & client : clients) {
+                client.run();
+            }
+            global_io_service.run();
+        }
+    } catch (exception& e){
+        cout << "Error" << endl;
     }
 }

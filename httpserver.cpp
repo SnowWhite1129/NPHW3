@@ -4,6 +4,8 @@
 #include <iostream>
 #include <memory>
 #include <utility>
+#include <regex>
+
 
 using namespace std;
 using namespace boost::asio;
@@ -27,17 +29,33 @@ private:
         _socket.async_read_some(
             buffer(_data, max_length),
             [this, self](boost::system::error_code ec, size_t length) {
-              if (!ec) do_write(length);
+              if (!ec){
+                  do_parse();
+              }
         });
     }
 
-    void do_write(size_t length) {
-        auto self(shared_from_this());
-        _socket.async_send(
-            buffer(_data, length),
-            [this, self](boost::system::error_code ec, size_t /* length */) {
-              if (!ec) do_read();
-            });
+    void do_parse(const string &url){
+        regex reg(R"((http[s]?:\/\/)?([^\/\s]+\/)*(.*\.cgi)(\?)(.*))");
+        smatch m;
+        string parse_parameter;
+        regex_search(url, m, reg);
+        parse_parameter = move(m[5].str());
+
+        global_io_service.notify_fork(io_service::fork_prepare);
+        pid_t pid = fork();
+        if (pid == 0){
+            global_io_service.notify_fork(boost::asio::io_service::fork_child);
+
+            close(0);
+            close(1);
+            close(2);
+
+            dup();
+            execvp();
+        } else{
+
+        }
     }
 };
 
