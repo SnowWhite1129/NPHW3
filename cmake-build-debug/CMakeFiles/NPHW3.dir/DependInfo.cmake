@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/media/seed/DATA/交大課程/01碩一(上)/02Network Programming/NPHW3/console.cpp" "/media/seed/DATA/交大課程/01碩一(上)/02Network Programming/NPHW3/cmake-build-debug/CMakeFiles/NPHW3.dir/console.cpp.o"
-  "/media/seed/DATA/交大課程/01碩一(上)/02Network Programming/NPHW3/httpserver.cpp" "/media/seed/DATA/交大課程/01碩一(上)/02Network Programming/NPHW3/cmake-build-debug/CMakeFiles/NPHW3.dir/httpserver.cpp.o"
+  "D:/03NCTU/01/02Network programming/02HW/03HW3/NPHW3/console.cpp" "D:/03NCTU/01/02Network programming/02HW/03HW3/NPHW3/cmake-build-debug/CMakeFiles/NPHW3.dir/console.cpp.obj"
+  "D:/03NCTU/01/02Network programming/02HW/03HW3/NPHW3/httpserver.cpp" "D:/03NCTU/01/02Network programming/02HW/03HW3/NPHW3/cmake-build-debug/CMakeFiles/NPHW3.dir/httpserver.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
