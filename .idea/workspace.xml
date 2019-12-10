@@ -11,7 +11,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed345d5d-64c7-454d-9831-06860f9cd88f" name="Default Changelist" comment="" />
+    <list default="true" id="ed345d5d-64c7-454d-9831-06860f9cd88f" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/console.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/console.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/httpserver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/httpserver.cpp" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,20 +30,20 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/httpserver.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="212">
-              <caret line="50" column="67" lean-forward="true" selection-start-line="50" selection-start-column="22" selection-end-line="50" selection-end-column="67" />
+            <state relative-caret-position="1380">
+              <caret line="59" column="22" lean-forward="true" selection-start-line="59" selection-start-column="22" selection-end-line="59" selection-end-column="22" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/console.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="29">
-              <caret line="215" column="16" lean-forward="true" selection-start-line="215" selection-start-column="16" selection-end-line="215" selection-end-column="16" />
+            <state relative-caret-position="4250">
+              <caret line="155" column="25" lean-forward="true" selection-start-line="155" selection-start-column="25" selection-end-line="155" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -56,10 +61,13 @@
     <findStrings>
       <find>Echo</find>
       <find>unsigned short</find>
+      <find>paremeter</find>
+      <find>sm</find>
     </findStrings>
     <replaceStrings>
       <replace>HTTP</replace>
       <replace>string</replace>
+      <replace>parameter</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -70,14 +78,14 @@
       <list>
         <option value="$PROJECT_DIR$/Makefile" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/console.cpp" />
         <option value="$PROJECT_DIR$/httpserver.cpp" />
+        <option value="$PROJECT_DIR$/console.cpp" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="183" />
-    <option name="y" value="-20" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="1959" />
+    <option name="y" value="-21" />
     <option name="width" value="1696" />
     <option name="height" value="1026" />
   </component>
@@ -141,18 +149,18 @@
       <workItem from="1575614350695" duration="6705000" />
       <workItem from="1575726906209" duration="5125000" />
       <workItem from="1575795913825" duration="12600000" />
-      <workItem from="1575864860962" duration="14582000" />
+      <workItem from="1575864860962" duration="41259000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="27182000" />
+    <option name="totallyTimeSpent" value="53859000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1696" height="1026" extended-state="7" />
+    <frame x="1672" y="-8" width="1696" height="1026" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.11637931" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.023399014" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -163,7 +171,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" visible="true" weight="0.043778803" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.043778803" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="CMake" order="11" />
@@ -226,17 +234,17 @@
     <entry file="file://$PROJECT_DIR$/console.cgi">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/console.cpp">
+    <entry file="file://$PROJECT_DIR$/httpserver.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="29">
-          <caret line="215" column="16" lean-forward="true" selection-start-line="215" selection-start-column="16" selection-end-line="215" selection-end-column="16" />
+        <state relative-caret-position="1380">
+          <caret line="59" column="22" lean-forward="true" selection-start-line="59" selection-start-column="22" selection-end-line="59" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/httpserver.cpp">
+    <entry file="file://$PROJECT_DIR$/console.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="50" column="67" lean-forward="true" selection-start-line="50" selection-start-column="22" selection-end-line="50" selection-end-column="67" />
+        <state relative-caret-position="4250">
+          <caret line="155" column="25" lean-forward="true" selection-start-line="155" selection-start-column="25" selection-end-line="155" selection-end-column="25" />
         </state>
       </provider>
     </entry>

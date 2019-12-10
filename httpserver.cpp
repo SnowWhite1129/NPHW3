@@ -5,8 +5,9 @@
 #include <memory>
 #include <utility>
 #include <regex>
-#include <process.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sstream>
 
 using namespace std;
 using namespace boost::asio;
@@ -48,54 +49,76 @@ private:
     }
 
     void do_parse(const string &url){
-        regex reg(R"((http[s]?:\/\/)?([^\/\s]+\/)*(.*\.cgi)(\?)(.*))");
+        istringstream iss(url);
+        string str;
+        string parse_parameter, service, host;
+        while (iss >> str){
+            if (str.find(".cgi") != string::npos){
+                parse_parameter = str;
+            } else if (str.find("Host") != string::npos){
+                iss >> host;
+                break;
+            }
+        }
+
+        regex reg(R"(([^\/\s]+\/)*(\/)(.*\.cgi)(\?)*(.*))");
         smatch m;
-        string parse_parameter, service;
-        regex_search(url, m, reg);
-        parse_parameter = move(m[5].str());
-        service = move(m[3].str());
 
-        global_io_service.notify_fork(io_service::fork_prepare);
-        pid_t pid = fork();
-        if (pid == 0){
-            global_io_service.notify_fork(boost::asio::io_service::fork_child);
+        if (regex_search(parse_parameter, m, reg)){
+            parse_parameter = move(m[5].str());
+            service = move(m[3].str());
+            service = "./" + service;
 
-            settingENV(m);
+            global_io_service.notify_fork(io_service::fork_prepare);
+            pid_t pid = fork();
+            if (pid == 0){
+                global_io_service.notify_fork(boost::asio::io_service::fork_child);
 
-            close(0);
-            close(1);
-            close(2);
+                settingENV(m, host);
 
-            dup(_socket.native_handle());
-            dup(_socket.native_handle());
-            dup(_socket.native_handle());
+                close(0);
+                close(1);
+                close(2);
 
-            char *args[2];
-            args[0] = strdup(service.c_str());
-            args[1] = nullptr;
+                dup(_socket.native_handle());
+                dup(_socket.native_handle());
+                dup(_socket.native_handle());
+                _socket.close();
 
-            if (execvp(args[0], args)<0)
+                char *args[2];
+                args[0] = strdup(service.c_str());
+                args[1] = NULL;
+                cout << "HTTP/1.1 200 OK" << endl;
+                if (execvp(args[0], args) < 0){
+                    cout << "Content-type: text/html" << endl << endl;
+                    cout << "Unknown service" << endl;
+                    cout << args[0] << endl;
+                }
 
-                cout << "Unknown service" << endl;
-
-            free(args[0]);
-            exit(0);
-        } else{
-            global_io_service.notify_fork(boost::asio::io_service::fork_parent);
-            _socket.close();
+                free(args[0]);
+                exit(0);
+            } else{
+                global_io_service.notify_fork(boost::asio::io_service::fork_parent);
+                _socket.close();
+            }
         }
     }
 
-    void settingENV(const smatch &m){
+    void settingENV(const smatch &m, string host){
+        if (m[3].str()=="panel.cgi"){
+            setenv("REQUEST_URI", m[3].str().c_str(), 1);
+            setenv("QUERY_STRING", "", 1);
+        } else{
+            setenv("REQUEST_URI", (m[3].str()+m[4].str()+m[5].str()).c_str(), 1);
+            setenv("QUERY_STRING", m[5].str().c_str(), 1);
+        }
         setenv("REQUEST_METHOD", "GET", 1);
-        setenv("REQUEST_URI", (m[3].str()+m[4].str()+m[5].str()).c_str(), 1);
-        setenv("QUERY_STRING", m[5].str().c_str(), 1);
         setenv("SERVER_PROTOCOL", "HTTP/1.1", 1);
-        setenv("HTTP_HOST", "localhost", 1);
-        setenv("SERVER_ADDR", _socket.local_endpoint().address().to_string(), 1);
-        setenv("SERVER_PORT", _socket.local_endpoint().port().to_string(), 1);
-        setenv("REMOTE_ADDR", _socket.remote_enpoint().address().to_string(), 1);
-        setenv("REMOTE_PORT", _socket.remote_enpoint().port().to_string(), 1);
+        setenv("HTTP_HOST", host.c_str(), 1);
+        setenv("SERVER_ADDR", _socket.local_endpoint().address().to_string().c_str(), 1);
+        setenv("SERVER_PORT", to_string(_socket.local_endpoint().port()).c_str(), 1);
+        setenv("REMOTE_ADDR", _socket.remote_endpoint().address().to_string().c_str(), 1);
+        setenv("REMOTE_PORT", to_string(_socket.remote_endpoint().port()).c_str(), 1);
     }
 };
 
@@ -128,7 +151,7 @@ int main(int argc, char* const argv[]) {
 
     signal(SIGCHLD, childHandler);
     clearenv();
-    setenv("PATH", "bin:.", 1);
+    setenv("PATH", "/usr/bin:.", 1);
 
     try {
         unsigned short port = atoi(argv[1]);

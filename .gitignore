@@ -1,5 +1,12 @@
 # Prerequisites
 *.d
+*.pdf
+*.mp4
+*.cgi
+.idea/
+cmake-build-debug/
+extra_files/
+test_case/
 
 # Compiled Object files
 *.slo

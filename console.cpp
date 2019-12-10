@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <vector>
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <fstream>
 #include <err.h>
 
@@ -22,19 +22,19 @@ using namespace ip;
 
 io_service global_io_service;
 
-void output_shell(int ID, const string &content){
-    boost::replace_all(content,"\r\n","&NewLine;");
-    boost::replace_all(content,"\n","&NewLine;");
+void output_shell(int ID, string content){
+    boost::replace_all(content, "\r\n", "&NewLine;");
+    boost::replace_all(content, "\n", "&NewLine;");
     boost::replace_all(content, "\\", "\\\\");
-    boost::replace_all(content,"\'","\\\'");
-    boost::replace_all(content,"<","&lt;");
-    boost::replace_all(content,">","&gt;");
+    boost::replace_all(content, "\'", "\\\'");
+    boost::replace_all(content, "<", "&lt;");
+    boost::replace_all(content, ">", "&gt;");
     string session = "s" + to_string(ID);
     cout << "<script>document.getElementById('{ " << session << "}').innerHTML += '{" << content << "}';</script>";
     fflush(stdout);
 }
 
-void output_command(int ID, const string &content){
+void output_command(int ID, string content){
     boost::replace_all(content,"\r\n","&NewLine;");
     boost::replace_all(content,"\n","&NewLine;");
     boost::replace_all(content, "\\", "\\\\");
@@ -67,9 +67,9 @@ public:
     _hostname(hostname),
     _port(port),
     _filename(filename),
-    _in(filename),
     _session(session){}
     void start(){
+        _in.open("test_case/" + _filename);
         do_resolve();
     }
 private:
@@ -126,11 +126,14 @@ private:
         auto self(shared_from_this());
         string line;
         getline(_in, line);
-        output_command(_session, line);
+        output_shell(_session, line);
         _socket.async_send(
                 buffer(line),
                 [this, self](boost::system::error_code ec, size_t length){
-
+            if (!ec)
+                do_read();
+            else
+                _socket.close();
         });
     }
 };
@@ -150,9 +153,42 @@ public:
     void run(){
         make_shared<ShellSession>(hostname, port, filename, session)->start();
     }
+    string output_server(){
+        string CSS = R"(            <th scope="col">)";
+        CSS += hostname;
+        CSS += R"(:)";
+        CSS += port;
+        CSS += R"(</th>)";
+        return CSS;
+    }
 };
 
 int main(){
+    vector <Client> clients;
+    string parse_parameter;
+    if (getenv("QUERY_STRING") != nullptr)
+        parse_parameter = getenv("QUERY_STRING");
+    else
+        parse_parameter = "";
+
+    regex reg("((|&)\\w+=)([^&]+)");
+    smatch m;
+    int session = 0;
+    while (regex_search(parse_parameter, m, reg)){
+        string hostname = m[3].str();
+        parse_parameter = m.suffix().str();
+        regex_search(parse_parameter, m, reg);
+        string port = m[3].str();
+        parse_parameter = m.suffix().str();
+        regex_search(parse_parameter, m, reg);
+        string filename = m[3].str();
+        parse_parameter = m.suffix().str();
+        regex_search(parse_parameter, m, reg);
+        Client client(hostname, port, filename, session);
+        clients.push_back(client);
+        ++session;
+    }
+
     string CSS = R"(
 <!DOCTYPE html>
 <html lang="en">
@@ -193,40 +229,26 @@ int main(){
   <body>
     <table class="table table-dark table-bordered">
       <thead>
-        <tr>
-          <th scope="col">nplinux7.cs.nctu.edu.tw:3333</th>
-          <th scope="col">nplinux8.cs.nctu.edu.tw:4444</th>
-          <th scope="col">nplinux9.cs.nctu.edu.tw:5555</th>
-        </tr>
+        <tr>)";
+    for (int i = 0; i < session; ++i) {
+        CSS += clients[i].output_server();
+    }
+    CSS+=R"(        </tr>
       </thead>
       <tbody>
-        <tr>
-          <td><pre id="s0" class="mb-0"></pre></td>
-          <td><pre id="s1" class="mb-0"></pre></td>
-          <td><pre id="s2" class="mb-0"></pre></td>
-        </tr>
+        <tr>)";
+    for (int i = 0; i < session; ++i) {
+        CSS+=R"(            <td><pre id="s0" class="mb-0"></pre></td>)";
+    }
+    CSS+=R"(        </tr>
       </tbody>
     </table>
   </body>
-</html>
-    )";
-    cout << "Content-type:text/html\r\n\r\n";
+</html>)";
+    cout << "HTTP/1.1 200 OK" << endl;
+    cout << "Content-type:text/html" << endl << endl;
     cout << CSS;
-    vector <Client> clients;
-    string parse_paremeter = getenv("QUERY_STRING");
-    regex reg("((|&)\\w+=)([^&]+)");
-    smatch m;
-    int session = 0;
-    while (regex_search(parse_paremeter, m, reg)){
-        string hostname = m[3].str();
-        regex_search(parse_paremeter, m, reg);
-        string port = m[3].str();
-        regex_search(parse_paremeter, m, reg);
-        string filename = m[3].str();
-        Client client(hostname, port, filename, session);
-        clients.push_back(client);
-        ++session;
-    }
+
     try {
         if (!clients.empty()){
             for (auto & client : clients) {
@@ -235,6 +257,6 @@ int main(){
             global_io_service.run();
         }
     } catch (exception& e){
-        cout << "Error" << endl;
+        cout << "Error" << e.what() << endl;
     }
 }
