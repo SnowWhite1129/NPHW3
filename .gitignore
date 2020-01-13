@@ -7,8 +7,11 @@
 cmake-build-debug/
 extra_files/
 test_case/
+<<<<<<< HEAD
 http_server
 console.cgi
+=======
+>>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
 
 # Compiled Object files
 *.slo
