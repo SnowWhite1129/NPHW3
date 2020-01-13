@@ -30,11 +30,7 @@ void output_shell(int ID, string content){
     boost::replace_all(content, "<", "&lt;");
     boost::replace_all(content, ">", "&gt;");
     string session = "s" + to_string(ID);
-<<<<<<< HEAD
     cout << "<script>document.getElementById('" << session << "').innerHTML += '" << content << "';</script>" << endl; 
-=======
-    cout << "<script>document.getElementById('{ " << session << "}').innerHTML += '{" << content << "}';</script>";
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
     fflush(stdout);
 }
 
@@ -46,20 +42,12 @@ void output_command(int ID, string content){
     boost::replace_all(content,"<","&lt;");
     boost::replace_all(content,">","&gt;");
     string session = "s" + to_string(ID);
-<<<<<<< HEAD
     cout << "<script>document.getElementById('" << session << "').innerHTML += '<b>" << content << "</b>';</script>" << endl;
     fflush(stdout);
 }
 
 
 class ShellSession :public enable_shared_from_this<ShellSession>{
-=======
-    cout << "<script>document.getElementById('{" << session << "}').innerHTML += '<b>{" << content << "}</b>';</script>";
-    fflush(stdout);
-}
-
-class ShellSession: enable_shared_from_this<ShellSession>{
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
 private:
     enum { max_length = 1024 };
     tcp::socket _socket;
@@ -73,24 +61,16 @@ private:
     ifstream _in;
     int _session;
 public:
-<<<<<<< HEAD
     ShellSession(string hostname, string port, string filename, int session):
-=======
-    ShellSession(const string &hostname, const string &port, const string &filename, int session):
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
     _socket(global_io_service),
     _resolver(global_io_service),
     _query(tcp::v4(), hostname, port),
     _hostname(hostname),
     _port(port),
     _filename(filename),
-<<<<<<< HEAD
     _in("test_case/" + _filename),
-=======
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
     _session(session){}
     void start(){
-        _in.open("test_case/" + _filename);
         do_resolve();
     }
 private:
@@ -132,20 +112,9 @@ private:
                     for (int i = 0; i < length; ++i) {
                         cmd += _data[i];
                     }
-<<<<<<< HEAD
                     output_shell(_session, cmd);
                     if (cmd.find("%")!=string::npos)
 			do_send_cmd();
-=======
-                    output_command(_session, cmd);
-                    for (int i = 0; i < length; ++i) {
-                        if (_data[i] == '%'){
-                            output_command(_session, "% ");
-                            do_send_cmd();
-                            break;
-                        }
-                    }
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
                     do_read();
                 } else{
                     _socket.close();
@@ -156,7 +125,6 @@ private:
         auto self(shared_from_this());
         string line;
         getline(_in, line);
-<<<<<<< HEAD
 	line += '\n';
         output_command(_session, line);
         _socket.async_send(
@@ -165,16 +133,6 @@ private:
 		if (ec){ 
 		    _socket.close();
 		}
-=======
-        output_shell(_session, line);
-        _socket.async_send(
-                buffer(line),
-                [this, self](boost::system::error_code ec, size_t length){
-            if (!ec)
-                do_read();
-            else
-                _socket.close();
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
         });
     }
 };
@@ -185,26 +143,15 @@ private:
     string filename;
     int session;
 public:
-<<<<<<< HEAD
     Client(string hostname_, string port_, string filename_, int session_){
-=======
-    Client(const string &hostname_, const string &port_, const string &filename_, int session_){
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
         hostname = hostname_;
         port = port_;
         filename = filename_;
         session = session_;
-<<<<<<< HEAD
     }
     void start(){
         make_shared<ShellSession>(hostname, port, filename, session)->start();
     }
-=======
-    }
-    void run(){
-        make_shared<ShellSession>(hostname, port, filename, session)->start();
-    }
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
     string output_server(){
         string CSS = R"(            <th scope="col">)";
         CSS += hostname;
@@ -218,24 +165,16 @@ public:
 int main(){
     vector <Client> clients;
     string parse_parameter;
-<<<<<<< HEAD
     char *tmp = getenv("QUERY_STRING");
     if (tmp != nullptr)
         parse_parameter = tmp;
     else
         parse_parameter = "";    
-=======
-    if (getenv("QUERY_STRING") != nullptr)
-        parse_parameter = getenv("QUERY_STRING");
-    else
-        parse_parameter = "";
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
 
     regex reg("((|&)\\w+=)([^&]+)");
     smatch m;
     int session = 0;
     while (regex_search(parse_parameter, m, reg)){
-<<<<<<< HEAD
         string hostname = m[3].str();        
 
 	parse_parameter = m.suffix().str();
@@ -249,18 +188,6 @@ int main(){
          
 	
 	Client client(hostname, port, filename, session);
-=======
-        string hostname = m[3].str();
-        parse_parameter = m.suffix().str();
-        regex_search(parse_parameter, m, reg);
-        string port = m[3].str();
-        parse_parameter = m.suffix().str();
-        regex_search(parse_parameter, m, reg);
-        string filename = m[3].str();
-        parse_parameter = m.suffix().str();
-        regex_search(parse_parameter, m, reg);
-        Client client(hostname, port, filename, session);
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
         clients.push_back(client);
         ++session;
     }
@@ -314,13 +241,9 @@ int main(){
       <tbody>
         <tr>)";
     for (int i = 0; i < session; ++i) {
-<<<<<<< HEAD
         CSS+=R"(            <td><pre id="s)";
 	CSS+= to_string(i);
 	CSS+=R"(" class="mb-0"></pre></td>)";
-=======
-        CSS+=R"(            <td><pre id="s0" class="mb-0"></pre></td>)";
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
     }
     CSS+=R"(        </tr>
       </tbody>
@@ -330,11 +253,7 @@ int main(){
     cout << "HTTP/1.1 200 OK" << endl;
     cout << "Content-type:text/html" << endl << endl;
     cout << CSS;
-<<<<<<< HEAD
 	
-=======
-
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
     try {
 	    
         for (int i=0; i<clients.size();++i) {
@@ -343,10 +262,6 @@ int main(){
 	
         global_io_service.run();
     } catch (exception& e){
-<<<<<<< HEAD
         cout << "Error: " << e.what() << endl;
-=======
-        cout << "Error" << e.what() << endl;
->>>>>>> 9e425653c0befe8a265483f6d791be61c8301a8b
     }
 }
